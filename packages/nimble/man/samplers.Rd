@@ -21,6 +21,8 @@
 \alias{sampler_CAR_proper}
 \alias{sampler_CRP}
 \alias{sampler_CRP_concentration}
+\alias{sampler_CRP_moreGeneral}
+\alias{sampler_CRP_old}
 \alias{sampler_RW}
 \alias{sampler_RW_PF}
 \alias{sampler_RW_PF_block}
@@ -78,6 +80,10 @@ sampler_CAR_proper(model, mvSaved, target, control)
 sampler_CRP_concentration(model, mvSaved, target, control)
 
 sampler_CRP(model, mvSaved, target, control)
+
+sampler_CRP_old(model, mvSaved, target, control)
+
+sampler_CRP_moreGeneral(model, mvSaved, target, control)
 }
 \arguments{
 \item{model}{(uncompiled) model on which the MCMC is to be run}
