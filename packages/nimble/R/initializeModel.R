@@ -59,6 +59,7 @@ initializeModel <- nimbleFunction(
         }
 
         LHSnodes <- allNodes[!bool]
+        LHSnodes <- c(LHSnodes, LHSnodes[1]) ## unused extra ensures LHSnodes is a vector (but it must be a valid node!) 
         nodeTypes <- allTypes[!bool]
         graphIDs <- graphIDs[!bool]
         rm(allNodes)
@@ -66,11 +67,13 @@ initializeModel <- nimbleFunction(
 #        LHSnodes <- model$getNodeNames()
 #        nodeTypes <- model$getNodeType(LHSnodes)
         bool <- nodeTypes == "stoch"
-        typeCode <- ifelse(nodeTypes == "determ", 1,
-                    ifelse(bool, 2,
-                           3)) ## Neither "stoch" nor "determ"
+        typeCode <- c(ifelse(nodeTypes == "determ", 1,
+                      ifelse(bool, 2,
+                             3)), ## Neither "stoch" nor "determ"
+                      1) ## The extra 1 ensures that typeCode is a vector, but it will not be used
         if(any(typeCode == 3)) message(paste0("found typeCode == 3 for "), paste(LHSnodes[typeCode==3], sep=", "))
-        isData <- model$isDataFromGraphID(graphIDs)
+        isData <- c(model$isDataFromGraphID(graphIDs),
+                    FALSE) ## extra unused element ensures isData will be a vector
         ## equivalent to:        isData <- model$isData(LHSnodes)
     },
     
@@ -78,7 +81,8 @@ initializeModel <- nimbleFunction(
         for(i in seq_along(initFunctionList)) {
             initFunctionList[[i]]$run()
         }
-        for(i in seq_along(typeCode)) {
+        numNodes <- length(typeCode)-1
+        for(i in 1:numNodes) {
             if(typeCode[i] == 1) { ## determ
                 initialize_deterministic(i)
             } else {
@@ -91,16 +95,15 @@ initializeModel <- nimbleFunction(
                 }
             }
         }
-        model$calculate(LHSnodes)
+        ## removed trailing full model$calculate() -DT Feb. 2019
+        ##model$calculate(LHSnodes)
     },
     methods = list(
         initialize_deterministic = function(i = integer()) {
+            model$calculate(LHSnodes[i])
             nodeValue <- values(model, LHSnodes[i])
             if(is.na.vec(nodeValue) | is.nan.vec(nodeValue)) {
-                model$calculate(LHSnodes[i])
-                nodeValue <- values(model, LHSnodes[i])
-                if(is.na.vec(nodeValue) | is.nan.vec(nodeValue))
-                    print('warning: value of deterministic node ',LHSnodes[i],': value is NA or NaN even after trying to calculate.')
+                print('warning: value of deterministic node ',LHSnodes[i],': value is NA or NaN even after trying to calculate.')
             }
         },
         initialize_stoch_data_node = function(i = integer()) {

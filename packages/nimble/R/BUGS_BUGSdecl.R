@@ -46,6 +46,7 @@ nimbleOrRfunctionNames <- c('[',
                             'loggam',
                             'log1p',
                             'lfactorial',
+                            'besselK',
                             'ceiling',
                             'floor',
                             'round',
@@ -657,7 +658,7 @@ getSymbolicParentNodesRecurse <- function(code, constNames = list(), indexNames 
     ##                indexing, not dynamic indexing
     ## - hasIndex: is there an index inside
     ## numeric constant
-    if(is.numeric(code) ||
+    if(is.numeric(code) || is.logical(code) || 
        (nimbleOptions()$allowDynamicIndexing &&
                        length(code) > 1 &&
                        code[[1]] == ".DYN_INDEXED")
@@ -905,7 +906,7 @@ genReplacementsAndCodeRecurse <- function(code,
                                           replaceVariableLHS = TRUE,
                                           debug = FALSE) {
     if(debug) browser()
-    if(is.numeric(code) ||
+    if(is.numeric(code) || is.logical(code) ||
        (nimbleOptions()$allowDynamicIndexing &&
                        length(code) > 1 &&
                        code[[1]] == '.DYN_INDEXED')
